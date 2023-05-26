@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/index.css">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.8/css/line.css">
+    <title>App Expensive Controller</title>
+</head>
+<body>
+    <!-- ========== Start Section ========== -->
+        <section class="top__container">
+            <div class="item" id="budget__container">
+                <div>
+                    <span>Entry a budget</span>
+                    <input type="text" placeholder="Entry a presupuest" id="budget">
+                    <span class="error__message" id="budget__message">Value not empty</span>
+                </div>
+                <button type="button" id="create__budget">Create</button>
+            </div>
+            <div class="item" id="expensive__container">
+                <div>
+                    <span>Name expensive</span>
+                    <input type="text" placeholder="Entry a expensive" id="name__expensive">
+                    <!-- <button type="button">Add</button> -->
+                    <span class="error__message" id="name__expensive__msg">Value not empty</span>
+                </div>
+                <div>
+                    <span>Expensive</span>
+                    <input type="text" placeholder="Entry price of expensive" id="amount__expensive">
+                    <span class="error__message" id="expensive__message">Value not empty</span>
+                </div>
+                <button type="button" id="add__expensive">Add</button>
+            </div>
+        </section>
+    <!-- ========== End Section ========== -->
+    <!-- ========== Start OutPut ========== -->
+        <section class="expensives__output">
+            <div class="balance">
+                <span>Budget</span>
+                <span class="budget" id="expensive__total">1500</span>
+                <span>Balance</span>
+                <span class="balance__total">788</span>
+            </div>
+            <div class="expense__list" id="expense__list">
+                <!-- Content generated from JavaScript -->
+            </div>
+        </section>
+    <!-- ========== End OutPut ========== -->       
+</body>
+<script src="./js/app.js"></script>
+</html>

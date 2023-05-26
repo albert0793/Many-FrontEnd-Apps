@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,500;0,600;1,400;1,500&display=swap');
+
+*
+{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+body
+{
+    background-color: linear-gradient(45deg, rgba(28,0,80,0.8) rgb(28, 0, 80));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.top__container
+{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    margin-top: 40px;
+    position: relative;
+    width: 100%;
+}
+.item
+{
+    padding: 30px;
+    min-width: 40%;
+    width: auto;
+    height: 300px;
+    background-color: #FFFFFF;
+    border-radius: .75rem;
+    box-shadow: 2px 2px 5px rgba(28,0,80,0.19);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.item:first-child input
+{
+    width: 100%;
+}
+.item span
+{
+    display: block;
+}
+.item .error__message
+{
+    color: #893742;
+    font-weight: 400;
+    display: none;
+}
+.item input
+{
+    width: 100%;
+    height: 30px;
+    padding: 20px 10px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.18);
+    font-weight: 300;
+}
+.item input,
+.item button
+{
+    border: none;
+    outline: none;
+}
+
+.item div button
+{
+    width: 110px;
+}
+.item button
+{
+    background-color: #565baa;
+    color: #FFFFFF;
+    cursor: pointer;
+    height: 40px;
+    transition: .3s all ease-in-out;
+}
+.item button:hover
+{
+    background-color: #474c8f;
+}
+/* expensives__output */
+.expensives__output
+{
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: calc(100% - 90px);
+    margin-top: 20px;
+}
+.balance
+{
+    width: 100%;
+    height: 60px;
+    background-color: #565baa;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.balance span
+{
+    color: #FFFFFF;
+    font-weight: 500;
+}
+.expense__list
+{
+    position: relative;
+    width: 100%;
+    display: grid;
+    /* grid-template-columns: repeat(3, minmax(100, 350px)); */
+    grid-template-columns: repeat(4, auto);
+    margin-top: 20px;
+    gap: .75rem;
+    align-items: center;
+}
+.expense__list .expense
+{
+    background-color: #FFFFFF;
+    box-shadow: 1px 1px 2px rgba(28,0,80,0.19);    
+    height: 100px;
+    border-radius: .4px;
+}
+.expense .options
+{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin: 0 1px;
+    margin-top: 10px;
+    gap: 10px;
+}
+.expense .options i
+{
+    width: 30px;
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.18);
+    text-align: center;
+    color: #FFFFFF;
+    transition: .3s all ease-in-out;
+}
+.expense .options i:hover
+{
+    background-color: #565baa;
+}
