@@ -131,30 +131,37 @@ body
 .expense .options
 {
     display: flex;
-    justify-content: flex-start;
+    justify-content: flex-end;
     align-items: center;
-    margin: 0 1px;
+    margin: 0 10px;
     margin-top: 10px;
     gap: 10px;
 }
 .expense .options i
 {
-    width: 30px;
+    width: 35px;
+    height: 35px;
     cursor: pointer;
     background-color: rgba(0, 0, 0, 0.18);
     text-align: center;
+    line-height: 35px;
     color: #FFFFFF;
     transition: .3s all ease-in-out;
 }
 .expense .options i:hover
 {
-    background-color: #565baa;
+    background-color: #ff2200bc;
+    transform: scale(1.2);
+}
+.expense .options i:last-child:hover
+{
+    background-color: #ff8800bc;
 }
 .alert
 {
     position: absolute;
     min-width: 250px;
-    width: max-content;
+    width: 300px;
     height: 80px;
     border-radius: .75rem;
     background-color: #FFFFFF;
@@ -164,25 +171,37 @@ body
     justify-content: center;
     align-items: center;
     top: 30px;
-    transition: .3s transform ease-in-out;
-    transform: translateX(-250%);
+    transition: .3s all ease-in-out;
+    transform: translateY(-500%)
 }
 .alert.success
 {
     background-color: #00a372;
     color: #FFFFFF;
     font-weight: 300;
-    transform: translateX(0);
+    transform: translateY(0)
 }
 .alert.danger
 {
-    background-color: #a31600;
+    background-color: #d12d14;
     color: #FFFFFF;
     font-weight: 300;
-    transform: translateX(0);
+    transform: translateY(0);
 }
 .alert.hidden 
 {   
-    transform: translateX(-250%);
+    transform: translateY(-500%);
     color: #FFFFFF;
+}
+
+@media only screen and (max-width: 780px)
+{
+    .expense__list
+    {
+        grid-template-columns: repeat(2, auto);
+    }
+    .balance {
+        /* flex-direction: column; */
+        height: 200px;
+    }
 }

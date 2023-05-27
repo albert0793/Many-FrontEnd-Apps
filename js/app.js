@@ -1,10 +1,10 @@
 const budget = document.querySelector("#budget");
 const nameExpensive = document.querySelector("#name__expensive");
+const expenseAmount = document.querySelector("#amount__expensive");
 const expensive_total = document.querySelector("#expensive__total");
 const budgetElement = document.querySelector(".budget");
 const balanceElement = document.querySelector(".balance__total");
 const expenseName = document.querySelector(".expense__name");
-const expenseAmount = document.querySelector("#amount__expensive");
 let total = 0;
 let balance = 0;
 let uniqueId = 0;
@@ -40,7 +40,11 @@ function messageHandler(message, type, cascade = true) {
 // Create Budget
 function createBudget() {
   if (budget.value == "" || parseInt(budget.value) <= 0) {
-    messageHandler("Please create a valid budget", "danger", false);
+    messageHandler("Please create a valid budget", "danger");
+    setTimeout(() => {
+      messageHandler("Please create a valid budget", "hidden");
+      budget.value = "";
+    }, 1000);
     return;
   }
   if (isNaN(budget.value)) {
@@ -71,9 +75,9 @@ function addExpensive() {
   let item = "";
   let amount = 0;
   if (nameExpensive.value == "" && expenseAmount.value == "") {
-    messageHandler("All Fileds Are Required", "danger");
+    messageHandler("All Fields Are Required", "danger");
     setTimeout(() => {
-      messageHandler("All Fileds Are Required", "hidden");
+      messageHandler("All Fields Are Required", "hidden");
     }, 2000);
     return;
   } else if (nameExpensive.value == "") {
@@ -107,7 +111,7 @@ function addExpensive() {
                   <span class="expense__amount">${amount}</span>
                   <div class="options">
                       <i class="uil uil-trash" onclick="deleteData(this)"></i>
-                      <i class="uil uil-pen" onclick="editData(this)"></i>
+                      <i class="uil uil-pen" onclick="prepareEdition(this)"></i>
                   </div>
               </div>`;
       messageHandler("Success", "success");
@@ -174,7 +178,7 @@ function showFromLocalStorage(key) {
   let budgetLocal = 0;
   let balanceLocal = 0;
   expenseList = value.length ? value : [];
-  uniqueId = expenseList.length ? expenseList.length + 1 : 1;
+  uniqueId = expenseList.length && value.length  ? value.length : 0;
   uniqueId = value.length ? value.length : 0;
   // Showing balance and budget from local storage
   if (expenseList.length && parseInt(localStorage.getItem("budget")) > 0) {
@@ -205,55 +209,61 @@ function showFromLocalStorage(key) {
         <span class="expense__amount">${item.amount}</span>
         <div class="options">
             <i class="uil uil-trash" onclick="deleteData(this)"></i>
-            <i class="uil uil-pen" onclick="editData(this)"></i>
+            <i class="uil uil-pen" onclick="prepareEdition(this)"></i>
         </div>
     </div>`;
     renderHTML(data, "expense__list");
   });
 }
-
 // Us define this variables for change data when editing
-let data = undefined;
-let id = undefined;
-let itemName = undefined;
-let itemAmount = undefined;
-let objNew = {};
-function editData(e) {
+let itemId;
+let dataEdited = {};
+let nameItem;
+let itemAmount;
+function prepareEdition(e) {
   editing = true;
-  id = e.parentElement.parentNode.getAttribute("id");
-  const parent = document.getElementById(id);
-  const form = document.getElementById("expensive__container");
-  const nameInput = form.querySelector("#name__expensive");
-  const amountInput = form.querySelector("#amount__expensive");
-  itemAmount = parent.querySelector(".expense__amount").textContent;
-  itemName = parent.querySelector(".expense__name").textContent;
-  nameInput.value = itemName;
-  amountInput.value = itemAmount;
+  itemId = event.target.parentElement.parentNode.getAttribute('id');
+  nameItem = event.target.parentElement.parentNode.children[0].innerHTML;
+  itemAmount = event.target.parentElement.parentNode.children[2].innerHTML;
+  nameExpensive.value = nameItem;
+  expenseAmount.value = itemAmount;
+}
+
+    
+function editData(id) {
+  editing = false;
+  if(expenseList.length > 0) {
+    let idx = expenseList.findIndex((item) => item.id === parseInt(id));
+    let itemNew = expenseList[idx];
+    itemNew.item = nameExpensive.value;
+    itemNew.amount = expenseAmount.value;
+    expenseList.splice(idx, 1);
+    expenseList.push(itemNew);
+    let balaceLocal = expenseList.reduce((acc, item) => parseInt(item.amount) + parseInt(acc), 0)
+    balance = total - balaceLocal; 
+    // console.log(balance)
+    balanceElement.innerHTML = balance;
+    saveIntoLocalStorage('items', expenseList);
+    let data = `<div class="expense" id="${itemNew.id}">
+        <h4 class="expense__name">${itemNew.item}</h4>
+        <span>Total</span>
+        <span class="expense__amount">${itemNew.amount}</span>
+        <div class="options">
+            <i class="uil uil-trash" onclick="deleteData(this)"></i>
+            <i class="uil uil-pen" onclick="prepareEdition(this)"></i>
+        </div>
+    </div>`;
+    document.getElementById(itemNew.id).innerHTML = '';
+    renderHTML(data, itemNew.id);
+    resetValues();
+  }
 }
 
 // Event Listener
 btnCreateBudget.addEventListener("click", createBudget);
 btnAddExpensive.addEventListener("click", (e) => {
   if (editing) {
-    let dataLocalStorage = JSON.parse(localStorage.getItem("items"));
-    let index = dataLocalStorage.findIndex((item) => item.id == id);
-    let newData = dataLocalStorage[index];
-    newData.id = newData.id;
-    newData.item = nameExpensive.value;
-    newData.amount = expenseAmount.value;
-    balance = (balance - parseInt(newData.amount));
-    balanceElement.innerHTML = balance;
-    dataLocalStorage.splice(index, 1);
-    dataLocalStorage.push(newData);
-    saveIntoLocalStorage("items", dataLocalStorage);
-    data = `<h4 class="expense__name">${newData.item}</h4>
-    <span>Total</span>
-    <span class="expense__amount">${newData.amount}</span>
-    <div class="options">
-    <i class="uil uil-trash" onclick="deleteData(this)"></i>
-    <i class="uil uil-pen" onclick="editData(this)"></i>
-    </div>`;
-    renderHTML(data, newData.id);
+    editData(itemId)
   } else {
     addExpensive();
   }
