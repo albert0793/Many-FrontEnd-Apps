@@ -7,40 +7,56 @@ const expenseName = document.querySelector(".expense__name");
 const expenseAmount = document.querySelector("#amount__expensive");
 let total = 0;
 let balance = 0;
+let uniqueId = 0;
 let editing = false;
-let uniqueId = 1;
 let expenseObject = {
   id: undefined,
   item: "",
   amount: 0,
 };
 let expenseList = [];
-// Buttons
 
+// Buttons
 const btnCreateBudget = document.querySelector("#create__budget");
 const btnAddExpensive = document.querySelector("#add__expensive");
 
 // Error Elements
-const errorElements = document.querySelectorAll(".error__message");
+const alertElement = document.querySelector("#alert");
+const alertErrorEl = document.querySelector("#alert__message");
+
+// Message Handler
+function messageHandler(message, type, cascade = true) {
+  message = message.toUpperCase();
+  if (cascade) {
+    alertElement.classList = "alert";
+    alertElement.classList.add(type);
+    alertErrorEl.innerHTML = message;
+  } else {
+    alertElement.classList.add(type);
+    alertErrorEl.innerHTML = message;
+  }
+}
 
 // Create Budget
 function createBudget() {
-  const errorElement = document.querySelector("#budget__message");
-  if (budget.value == "") {
-    errorElement.innerHTML = "Please select a budget";
-    errorElement.style.display = "block";
+  if (budget.value == "" || parseInt(budget.value) <= 0) {
+    messageHandler("Please create a valid budget", "danger", false);
     return;
   }
   if (isNaN(budget.value)) {
-    errorElement.style.display = "block";
-    errorElement.innerHTML = "Please use only numbers (0-9)";
+    messageHandler("Please use only numbers (0-9)", "danger");
+    return;
   } else {
-    total = budget.value;
-    balance = budget.value;
+    total = parseInt(budget.value);
+    balance = parseInt(budget.value);
     expensive_total.textContent = total;
-    errorElement.style.display = "block";
     balanceElement.innerHTML = balance;
-    errorElement.textContent = "Budget created successfully";
+    messageHandler("Budget created successfully", "success");
+    setTimeout(() => {
+      messageHandler("Budget created successfully", "hidden");
+      budget.value = "";
+    }, 1000);
+    saveIntoLocalStorage("budget", total);
   }
   // errorElement.style.display = 'none';
 }
@@ -52,45 +68,54 @@ function idGenerator() {
 
 // Add Expensive
 function addExpensive() {
-  const messageExpensiveNameElement = document.getElementById(
-    "name__expensive__msg"
-  );
-  const amountExpensiveElement = document.getElementById("expensive__message");
   let item = "";
   let amount = 0;
   if (nameExpensive.value == "" && expenseAmount.value == "") {
-    messageExpensiveNameElement.textContent = "Expensive name is required";
-    amountExpensiveElement.textContent = "Expensive value is required";
-    amountExpensiveElement.style.display = "block";
-    messageExpensiveNameElement.style.display = "block";
+    messageHandler("All Fileds Are Required", "danger");
+    setTimeout(() => {
+      messageHandler("All Fileds Are Required", "hidden");
+    }, 2000);
+    return;
   } else if (nameExpensive.value == "") {
-    messageExpensiveNameElement.textContent = "Expensive name is required";
-    messageExpensiveNameElement.style.display = "block";
+    messageHandler("Expensive name is required", "danger");
+    setTimeout(() => {
+      messageHandler("Expensive name is required", "hidden");
+    }, 2000);
+    return;
   } else if (expenseAmount.value == "") {
-    amountExpensiveElement.textContent = "Expensive value is required";
-    amountExpensiveElement.style.display = "block";
+    messageHandler("Expensive Amount is required", "danger");
+    setTimeout(() => {
+      messageHandler("Expensive Amount is required", "hidden");
+    }, 2000);
+    return;
   } else {
     if (isNaN(expenseAmount.value)) {
-      amountExpensiveElement.textContent = "Please enter a valid amount";
-      amountExpensiveElement.style.display = "block";
+      messageHandler("Please enter a valid amount", "danger");
+      setTimeout(() => {
+        messageHandler("Please enter a valid amount", "hidden");
+      }, 2000);
+      return;
+    } else {
+      item = nameExpensive.value;
+      amount = Number(expenseAmount.value);
+      balance = balance - amount;
+      balanceElement.innerHTML = parseInt(balance);
+      const innerHTML = ` 
+              <div class="expense" id="${idGenerator()}">
+                  <h4 class="expense__name">${item}</h4>
+                  <span>Total</span>
+                  <span class="expense__amount">${amount}</span>
+                  <div class="options">
+                      <i class="uil uil-trash" onclick="deleteData(this)"></i>
+                      <i class="uil uil-pen" onclick="editData(this)"></i>
+                  </div>
+              </div>`;
+      messageHandler("Success", "success");
+      setTimeout(() => {
+        messageHandler("success", "hidden");
+      }, 500);
+      renderHTML(innerHTML, "expense__list");
     }
-    item = nameExpensive.value;
-    amount = Number(expenseAmount.value);
-    total = total - amount;
-    balance = total;
-    balanceElement.innerHTML = parseInt(balance);
-    amountExpensiveElement.style.display = "none";
-    const innerHTML = ` 
-            <div class="expense" id="${idGenerator()}">
-                <h4 class="expense__name">${item}</h4>
-                <span>Total</span>
-                <span class="expense__amount">${amount}</span>
-                <div class="options">
-                    <i class="uil uil-trash" onclick="deleteData(this)"></i>
-                    <i class="uil uil-pen" onclick="editData(this)"></i>
-                </div>
-            </div>`;
-    renderHTML(innerHTML, "expense__list");
   }
   expenseObject = {
     id: uniqueId,
@@ -98,7 +123,6 @@ function addExpensive() {
     amount: amount,
   };
   expenseList.push(expenseObject);
-  // // amounExpensiveElement.style.display = 'block';
   saveIntoLocalStorage("items", expenseList);
 }
 function resetValues() {
@@ -126,27 +150,55 @@ function renderHTML(data, id) {
 }
 
 function deleteData(e) {
-  const id = e.parentElement.parentNode.getAttribute("id");
-  const parent = document.getElementById(id);
-  balance = parseInt(
-    total + parseInt(parent.querySelector(".expense__amount").textContent)
-  );
-  total = balance;
-  balanceElement.innerHTML = balance;
-  document.getElementById(id).remove();
-  return true;
+  if (editing) {
+    resetValues();
+  } else {
+    const id = e.parentElement.parentNode.getAttribute("id");
+    let idx = expenseList.findIndex((item) => item.id == id);
+    balance = balance + parseInt(expenseList[idx].amount);
+    balanceElement.innerHTML = balance;
+    expenseList.splice(idx, 1);
+    saveIntoLocalStorage("items", expenseList);
+    document.getElementById(id).remove();
+    return true;
+  }
 }
 
-// Save in the local storage
+// Save into local storage
 function saveIntoLocalStorage(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
 function showFromLocalStorage(key) {
   const value = JSON.parse(localStorage.getItem(key));
-  uniqueId = value.length;
-  expenseList = value;
-  value.map((item) => {
+  let budgetLocal = 0;
+  let balanceLocal = 0;
+  expenseList = value.length ? value : [];
+  uniqueId = expenseList.length ? expenseList.length + 1 : 1;
+  uniqueId = value.length ? value.length : 0;
+  // Showing balance and budget from local storage
+  if (expenseList.length && parseInt(localStorage.getItem("budget")) > 0) {
+    budgetLocal = parseInt(localStorage.getItem("budget"));
+    balanceLocal = expenseList.reduce(
+      (acc, expense) => parseInt(expense.amount) + parseInt(acc),
+      0
+    );
+    total = budgetLocal;
+    balance = total - balanceLocal;
+    expensive_total.textContent = total;
+    balanceElement.textContent = balance;
+  } else if (parseInt(localStorage.getItem("budget")) > 0) {
+    budgetLocal = parseInt(localStorage.getItem("budget"));
+    balanceLocal = expenseList.reduce(
+      (acc, expense) => parseInt(expense.amount) + parseInt(acc),
+      0
+    );
+    total = budgetLocal;
+    balance = total - balanceLocal;
+    expensive_total.textContent = total;
+    balanceElement.textContent = balance;
+  }
+  value.map((item, index) => {
     let data = `<div class="expense" id="${item.id}">
         <h4 class="expense__name">${item.item}</h4>
         <span>Total</span>
@@ -156,7 +208,6 @@ function showFromLocalStorage(key) {
             <i class="uil uil-pen" onclick="editData(this)"></i>
         </div>
     </div>`;
-    uniqueId = expenseList.length;
     renderHTML(data, "expense__list");
   });
 }
@@ -179,36 +230,35 @@ function editData(e) {
   nameInput.value = itemName;
   amountInput.value = itemAmount;
 }
-// Events Listener
 
+// Event Listener
 btnCreateBudget.addEventListener("click", createBudget);
-btnAddExpensive.addEventListener("click", () => {
+btnAddExpensive.addEventListener("click", (e) => {
   if (editing) {
-    itemName = nameExpensive.value;
-    itemAmount = expenseAmount.value;
-    objNew = {
-        id: id,
-        item: itemName,
-        amount: itemAmount,
-      };
-      expenseList.push(objNew);
-      localStorage.removeItem("items");
-      saveIntoLocalStorage('items', expenseList);
-    data = `<h4 class="expense__name">${itemName}</h4>
+    let dataLocalStorage = JSON.parse(localStorage.getItem("items"));
+    let index = dataLocalStorage.findIndex((item) => item.id == id);
+    let newData = dataLocalStorage[index];
+    newData.id = newData.id;
+    newData.item = nameExpensive.value;
+    newData.amount = expenseAmount.value;
+    balance = (balance - parseInt(newData.amount));
+    balanceElement.innerHTML = balance;
+    dataLocalStorage.splice(index, 1);
+    dataLocalStorage.push(newData);
+    saveIntoLocalStorage("items", dataLocalStorage);
+    data = `<h4 class="expense__name">${newData.item}</h4>
     <span>Total</span>
-    <span class="expense__amount">${itemAmount}</span>
+    <span class="expense__amount">${newData.amount}</span>
     <div class="options">
     <i class="uil uil-trash" onclick="deleteData(this)"></i>
     <i class="uil uil-pen" onclick="editData(this)"></i>
     </div>`;
-    renderHTML(data, id);
+    renderHTML(data, newData.id);
   } else {
-    saveIntoLocalStorage("items", expenseList);
     addExpensive();
   }
 });
 
 document.addEventListener("DOMContentLoaded", () => {
   showFromLocalStorage("items");
-//   localStorage.removeItem('items');
 });
